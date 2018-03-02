@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="HelloARController.cs" company="Google">
+// <copyright file="ARController.cs" company="Google">
 //
 // Copyright 2017 Google Inc. All Rights Reserved.
 //
@@ -18,7 +18,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace GoogleARCore.HelloAR
+namespace GoogleARCore.ARFuniture
 {
     using System.Collections.Generic;
     using GoogleARCore;
@@ -30,9 +30,9 @@ namespace GoogleARCore.HelloAR
 #endif
 
     /// <summary>
-    /// Controls the HelloAR example.
+    /// ARController.
     /// </summary>
-    public class HelloARController : MonoBehaviour
+    public class ARController : MonoBehaviour
     {
         /// <summary>
         /// The first-person camera being used to render the passthrough camera image (i.e. AR background).
@@ -45,14 +45,30 @@ namespace GoogleARCore.HelloAR
         public GameObject TrackedPlanePrefab;
 
         /// <summary>
-        /// A model to place when a raycast from a user touch hits a plane.
+        /// A table model to place when a raycast from a user touch hits a plane.
         /// </summary>
-        public GameObject AndyAndroidPrefab;
+        public GameObject TableObject;
+
+		/// <summary>
+		/// A chair model to place when a raycast from a user touch hits a plane.
+		/// </summary>
+		public GameObject ChairObject;
+
+		/// <summary>
+		/// Object for UI control.
+		/// </summary>
+		//private List<GameObject> m_ControlObjects = new List<GameObject>();
+		private GameObject m_ControlObject;
 
         /// <summary>
-        /// A gameobject parenting UI for displaying the "searching for planes" snackbar.
+        /// A gameobject parenting UI for displaying the initial message
         /// </summary>
-        public GameObject SearchingForPlaneUI;
+        public GameObject InitialMessage;
+
+		/// <summary>
+		/// A gameobject parenting UI for displaying the AR message
+		/// </summary>
+		public GameObject ARMessage;
 
         /// <summary>
         /// A list to hold new planes ARCore began tracking in the current frame. This object is used across
@@ -71,18 +87,40 @@ namespace GoogleARCore.HelloAR
         /// </summary>
         private bool m_IsQuitting = false;
 
+		public void CreateTable()
+		{
+			// TODO: Add List : initial pose is center position
+			//m_ControlObject = gameObject.Instantiate(TableObject, Vector3.zero, Quaternion.identity);
+			m_ControlObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
+			m_ControlObject.transform.localScale = new Vector3 (0.1f, 0.1f, 0.1f);
+		}
+
+		public void CreateChair()
+		{
+			// TODO: Add List : initial pose is center position
+			//m_ControlObject = gameObject.Instantiate(ChairObject, Vector3.zero, Quaternion.identity);
+			m_ControlObject = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+			m_ControlObject.transform.localScale = new Vector3 (0.1f, 0.1f, 0.1f);
+		}
+
+		public void Remove()
+		{
+			// TODO: List out
+		}
+
+		public void Quit()
+		{
+			m_IsQuitting = true;
+			Application.Quit();
+
+			_QuitOnConnectionErrors();
+		}
+
         /// <summary>
         /// The Unity Update() method.
         /// </summary>
         public void Update()
         {
-            if (Input.GetKey(KeyCode.Escape))
-            {
-                Application.Quit();
-            }
-
-            _QuitOnConnectionErrors();
-
             // Check that motion tracking is tracking.
             if (Session.Status != SessionStatus.Tracking)
             {
@@ -90,7 +128,7 @@ namespace GoogleARCore.HelloAR
                 Screen.sleepTimeout = lostTrackingSleepTimeout;
                 if (!m_IsQuitting && Session.Status.IsValid())
                 {
-                    SearchingForPlaneUI.SetActive(true);
+					InitialMessage.SetActive(true);
                 }
 
                 return;
@@ -122,11 +160,18 @@ namespace GoogleARCore.HelloAR
                 }
             }
 
-            SearchingForPlaneUI.SetActive(showSearchingUI);
+			InitialMessage.SetActive(showSearchingUI);
+			if (showSearchingUI == false) {
+				if (m_ControlObject != null) {
+					ARMessage.SetActive (false);
+				} else {
+					ARMessage.SetActive (true);
+				}
+			}
 
             // If the player has not touched the screen, we are done with this update.
             Touch touch;
-            if (Input.touchCount < 1 || (touch = Input.GetTouch(0)).phase != TouchPhase.Began)
+			if (Input.touchCount < 1 || (touch = Input.GetTouch(0)).phase != TouchPhase.Moved)
             {
                 return;
             }
@@ -138,11 +183,12 @@ namespace GoogleARCore.HelloAR
 
             if (Frame.Raycast(touch.position.x, touch.position.y, raycastFilter, out hit))
             {
-                var andyObject = Instantiate(AndyAndroidPrefab, hit.Pose.position, hit.Pose.rotation);
+				m_ControlObject.transform.localPosition = hit.Pose.position;
+				m_ControlObject.transform.localRotation = hit.Pose.rotation;
 
                 // Create an anchor to allow ARCore to track the hitpoint as understanding of the physical
                 // world evolves.
-                var anchor = hit.Trackable.CreateAnchor(hit.Pose);
+                //var anchor = hit.Trackable.CreateAnchor(hit.Pose);
 
                 // Andy should look at the camera but still be flush with the plane.
                 if ((hit.Flags & TrackableHitFlags.PlaneWithinPolygon) != TrackableHitFlags.None)
@@ -152,12 +198,14 @@ namespace GoogleARCore.HelloAR
                     cameraPositionSameY.y = hit.Pose.position.y;
 
                     // Have Andy look toward the camera respecting his "up" perspective, which may be from ceiling.
-                    andyObject.transform.LookAt(cameraPositionSameY, andyObject.transform.up);
+					m_ControlObject.transform.LookAt(cameraPositionSameY, m_ControlObject.transform.up);
                 }
 
                 // Make Andy model a child of the anchor.
-                andyObject.transform.parent = anchor.transform;
+                //andyObject.transform.parent = anchor.transform;
             }
+
+			// TODO: Render all object in list
         }
 
         /// <summary>
