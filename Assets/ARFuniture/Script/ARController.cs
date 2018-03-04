@@ -56,6 +56,8 @@ namespace GoogleARCore.ARFuniture
 	/// </summary>
 	public GameObject ChairObject;
 
+	public GameObject RotationObject;
+
 	/// <summary>
 	/// Object for UI control.
 	/// </summary>
@@ -105,9 +107,14 @@ namespace GoogleARCore.ARFuniture
 
 	public GameObject QuitUI;
 
-	private Rect GetScreenCoordinates(RectTransform uiElement)
+	public GameObject m_RotationObject;
+
+	private bool m_IsSelectRotObj = false;
+	private Vector2 m_BeginRotPosition = Vector2.zero;
+
+	private Rect GetScreenCoordinates (RectTransform uiElement)
 	{
-	    Vector3 []worldCorner = new Vector3[4];
+	    Vector3[] worldCorner = new Vector3[4];
 	    uiElement.GetWorldCorners (worldCorner);
 	    return new Rect (
 		worldCorner [0].x,
@@ -125,6 +132,9 @@ namespace GoogleARCore.ARFuniture
 	    m_ButtonCreateTable = ButtonCreateTable.GetComponent<Button> ();   
 	    m_ButtonCreateChair = ButtonCreateChair.GetComponent<Button> ();   
 	    m_ButtonRemove = ButtonRemove.GetComponent<Button> ();  
+
+	    m_RotationObject = GameObject.Instantiate (RotationObject);
+	    m_RotationObject.SetActive (false);
 	}
 
 	public void CreateTable ()
@@ -149,6 +159,7 @@ namespace GoogleARCore.ARFuniture
 	    m_ControlObjects.Add (GameObject.Instantiate (ChairObject, m_CurrentPosition, m_CurrentRotation));
 	}
 
+	private bool m_Cancel = false;
 	public void Remove ()
 	{
 	    if (m_IsInstantMsg)
@@ -160,16 +171,22 @@ namespace GoogleARCore.ARFuniture
 	    m_ControlObjects.Remove (m_ControlObject);
 	    DestroyImmediate (m_ControlObject);
 	    m_ButtonRemove.interactable = false;
+	    m_RotationObject.SetActive (false);
+
+	    m_IsSelectRotObj = false;
+
+
 	}
 
 	private bool m_IsInstantMsg = false;
+
 	public void Quit ()
 	{
 	    QuitUI.SetActive (true);
 	    m_IsInstantMsg = true;
 	}
 
-	public void SelectQuit()
+	public void SelectQuit ()
 	{
 	    m_IsQuitting = true;
 	    Application.Quit ();
@@ -181,13 +198,14 @@ namespace GoogleARCore.ARFuniture
 	    m_IsInstantMsg = false;
 	}
 
-	public void SelectQuitCancel()
+	public void SelectQuitCancel ()
 	{
 	    QuitUI.SetActive (false);
 
 	    m_IsInstantMsg = false;
+	    m_Cancel = true;
 	}
-	    
+
 	/// <summary>
 	/// The Unity Update() method.
 	/// </summary>
@@ -208,6 +226,7 @@ namespace GoogleARCore.ARFuniture
 		m_ButtonRemove.interactable = false;
 		m_ButtonCreateTable.interactable = false;
 		m_ButtonCreateChair.interactable = false;
+		m_RotationObject.SetActive (false);
 		return;
 	    }
 
@@ -264,24 +283,47 @@ namespace GoogleARCore.ARFuniture
 		RaycastHit hitOjbect;
 		Ray ray = Camera.main.ScreenPointToRay (pos);
 		if (Physics.Raycast (ray, out hitOjbect, 50.0f)) {
-		    m_ControlObject = hitOjbect.collider.gameObject;
-		    m_ButtonRemove.interactable = true;
+		    if (m_RotationObject == hitOjbect.collider.gameObject) {
+			m_IsSelectRotObj = true;
+			m_BeginRotPosition = pos;
+		    } else {
+			m_ControlObject = hitOjbect.collider.gameObject;
+			m_ButtonRemove.interactable = true;
+			m_IsSelectRotObj = false;
+		    }
 		} else {
+		    m_IsSelectRotObj = false;
 		    m_ControlObject = null;
 		    m_ButtonRemove.interactable = false;
 		}
 	    }
 
-	    if (m_ControlObject == null)
+	    if (m_ControlObject == null) {
+		m_RotationObject.SetActive (false);
 		return;
+	    } else {
+		m_RotationObject.SetActive (true);
+	    }
 
-	    if (Input.touchCount < 1 || touch.phase != TouchPhase.Moved) {
+	    if (m_IsSelectRotObj) {
+		if (touch.phase == TouchPhase.Moved) {
+		    float d = Vector2.Distance (m_BeginRotPosition, touch.position) / 50.0f;
+		    if (m_BeginRotPosition.x - touch.position.x < 0)
+			d *= -1;
+		    m_ControlObject.transform.localEulerAngles += new Vector3 (0.0f, d, 0.0f);
+		}
+	    }
+
+	    if (m_Cancel) {
+		m_Cancel = false;
 		return;
 	    }
 
 	    if (Frame.Raycast (touch.position.x, touch.position.y, raycastFilter, out hit)) {
-		m_ControlObject.transform.localPosition = hit.Pose.position;
-		//m_ControlObject.transform.localRotation = hit.Pose.rotation;
+		if (m_IsSelectRotObj == false) {
+		    m_ControlObject.transform.localPosition = hit.Pose.position;
+		    m_RotationObject.transform.localPosition = new Vector3 (hit.Pose.position.x, hit.Pose.position.y, hit.Pose.position.z);
+		}
 	    }
 	}
 

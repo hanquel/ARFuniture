@@ -736,12 +736,15 @@ MonoBehaviour:
     type: 2}
   ChairObject: {fileID: 1185254556602196, guid: 337807eda1654c445afe604fc03073d0,
     type: 2}
+  RotationObject: {fileID: 1761616791394940, guid: d9fe5a5a038a9e34a8593ccd3f67b43f,
+    type: 2}
   InitialMessage: {fileID: 1133631540}
   ARMessage: {fileID: 203970821}
   ButtonRemove: {fileID: 828027945}
   ButtonCreateTable: {fileID: 1269280551}
   ButtonCreateChair: {fileID: 567994652}
   QuitUI: {fileID: 1271493123}
+  m_RotationObject: {fileID: 0}
 --- !u!1 &724663129
 GameObject:
   m_ObjectHideFlags: 0
