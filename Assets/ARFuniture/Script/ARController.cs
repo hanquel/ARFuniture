@@ -89,9 +89,6 @@ namespace GoogleARCore.ARFuniture
 	/// </summary>
 	private bool m_IsQuitting = false;
 
-	//public GameObject RotationObject;
-	//private GameObject m_RotationObject;
-
 	public GameObject ButtonRemove;
 	private Button m_ButtonRemove;
 
@@ -105,6 +102,8 @@ namespace GoogleARCore.ARFuniture
 	private Quaternion m_CurrentRotation = Quaternion.identity;
 
 	private Rect m_ButtonUIRect;
+
+	public GameObject QuitUI;
 
 	private Rect GetScreenCoordinates(RectTransform uiElement)
 	{
@@ -130,28 +129,31 @@ namespace GoogleARCore.ARFuniture
 
 	public void CreateTable ()
 	{
+	    if (m_IsInstantMsg)
+		return;
+	    
 	    if (m_CurrentPosition == Vector3.zero)
 		return;
 
 	    m_ControlObjects.Add (GameObject.Instantiate (TableObject, m_CurrentPosition, m_CurrentRotation));
-
-	   // if (m_RotationObject == null)
-		//m_RotationObject = GameObject.Instantiate (RotationObject, m_CurrentPosition + new Vector3(0.0f, -0.1f, -0.1f), RotationObject.transform.localRotation);
 	}
 
 	public void CreateChair ()
 	{
+	    if (m_IsInstantMsg)
+		return;
+	    
 	    if (m_CurrentPosition == Vector3.zero)
 		return;
 			
 	    m_ControlObjects.Add (GameObject.Instantiate (ChairObject, m_CurrentPosition, m_CurrentRotation));
-
-	    //if (m_RotationObject == null)
-		//m_RotationObject = GameObject.Instantiate (RotationObject, m_CurrentPosition + new Vector3(0.0f, -0.1f, -0.1f), RotationObject.transform.localRotation);
 	}
 
 	public void Remove ()
 	{
+	    if (m_IsInstantMsg)
+		return;
+	    
 	    if (m_ControlObject == null)
 		return;
 	    
@@ -160,12 +162,30 @@ namespace GoogleARCore.ARFuniture
 	    m_ButtonRemove.interactable = false;
 	}
 
+	private bool m_IsInstantMsg = false;
 	public void Quit ()
+	{
+	    QuitUI.SetActive (true);
+	    m_IsInstantMsg = true;
+	}
+
+	public void SelectQuit()
 	{
 	    m_IsQuitting = true;
 	    Application.Quit ();
 
 	    _QuitOnConnectionErrors ();
+
+	    QuitUI.SetActive (false);
+
+	    m_IsInstantMsg = false;
+	}
+
+	public void SelectQuitCancel()
+	{
+	    QuitUI.SetActive (false);
+
+	    m_IsInstantMsg = false;
 	}
 	    
 	/// <summary>
@@ -173,6 +193,9 @@ namespace GoogleARCore.ARFuniture
 	/// </summary>
 	public void Update ()
 	{
+	    if (m_IsInstantMsg)
+		return;
+	    
 	    // Check that motion tracking is tracking.
 	    if (Session.Status != SessionStatus.Tracking) {
 		const int lostTrackingSleepTimeout = 15;
@@ -259,8 +282,6 @@ namespace GoogleARCore.ARFuniture
 	    if (Frame.Raycast (touch.position.x, touch.position.y, raycastFilter, out hit)) {
 		m_ControlObject.transform.localPosition = hit.Pose.position;
 		//m_ControlObject.transform.localRotation = hit.Pose.rotation;
-
-		//m_RotationObject.transform.localPosition = hit.Pose.position + new Vector3 (0.0f, -0.1f, -0.1f);
 	    }
 	}
 
