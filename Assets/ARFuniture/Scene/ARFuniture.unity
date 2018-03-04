@@ -744,7 +744,6 @@ MonoBehaviour:
   ButtonCreateTable: {fileID: 1269280551}
   ButtonCreateChair: {fileID: 567994652}
   QuitUI: {fileID: 1271493123}
-  m_RotationObject: {fileID: 0}
 --- !u!1 &724663129
 GameObject:
   m_ObjectHideFlags: 0
@@ -965,7 +964,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 627916103}
-        m_MethodName: Remove
+        m_MethodName: RemoveObject
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

@@ -46,17 +46,10 @@ namespace GoogleARCore.ARFuniture
 	/// </summary>
 	public GameObject TrackedPlanePrefab;
 
-	/// <summary>
-	/// A table model to place when a raycast from a user touch hits a plane.
-	/// </summary>
 	public GameObject TableObject;
-
-	/// <summary>
-	/// A chair model to place when a raycast from a user touch hits a plane.
-	/// </summary>
 	public GameObject ChairObject;
-
 	public GameObject RotationObject;
+	private GameObject m_RotationObject;
 
 	/// <summary>
 	/// Object for UI control.
@@ -64,14 +57,7 @@ namespace GoogleARCore.ARFuniture
 	private List<GameObject> m_ControlObjects = new List<GameObject> ();
 	private GameObject m_ControlObject;
 
-	/// <summary>
-	/// A gameobject parenting UI for displaying the initial message
-	/// </summary>
 	public GameObject InitialMessage;
-
-	/// <summary>
-	/// A gameobject parenting UI for displaying the AR message
-	/// </summary>
 	public GameObject ARMessage;
 
 	/// <summary>
@@ -106,8 +92,6 @@ namespace GoogleARCore.ARFuniture
 	private Rect m_ButtonUIRect;
 
 	public GameObject QuitUI;
-
-	public GameObject m_RotationObject;
 
 	private bool m_IsSelectRotObj = false;
 	private Vector2 m_BeginRotPosition = Vector2.zero;
@@ -160,7 +144,8 @@ namespace GoogleARCore.ARFuniture
 	}
 
 	private bool m_Cancel = false;
-	public void Remove ()
+
+	public void RemoveObject ()
 	{
 	    if (m_IsInstantMsg)
 		return;
@@ -211,6 +196,10 @@ namespace GoogleARCore.ARFuniture
 	/// </summary>
 	public void Update ()
 	{
+	    if (Input.GetKey(KeyCode.Escape)) {
+		Application.Quit();
+	    }
+		
 	    if (m_IsInstantMsg)
 		return;
 	    
