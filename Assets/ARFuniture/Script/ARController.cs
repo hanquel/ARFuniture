@@ -121,6 +121,8 @@ namespace GoogleARCore.ARFuniture
 	    m_RotationObject.SetActive (false);
 	}
 
+	private bool firstCreate = false;
+
 	public void CreateTable ()
 	{
 	    if (m_IsInstantMsg)
@@ -129,7 +131,14 @@ namespace GoogleARCore.ARFuniture
 	    if (m_CurrentPosition == Vector3.zero)
 		return;
 
+	   
+
 	    m_ControlObjects.Add (GameObject.Instantiate (TableObject, m_CurrentPosition, m_CurrentRotation));
+	   
+	    m_RotationObject.transform.localPosition = m_CurrentPosition;
+
+
+	    firstCreate = true;
 	}
 
 	public void CreateChair ()
@@ -141,6 +150,8 @@ namespace GoogleARCore.ARFuniture
 		return;
 			
 	    m_ControlObjects.Add (GameObject.Instantiate (ChairObject, m_CurrentPosition, m_CurrentRotation));
+	    m_RotationObject.transform.localPosition = m_CurrentPosition;
+	    firstCreate = true;
 	}
 
 	private bool m_Cancel = false;
@@ -196,8 +207,8 @@ namespace GoogleARCore.ARFuniture
 	/// </summary>
 	public void Update ()
 	{
-	    if (Input.GetKey(KeyCode.Escape)) {
-		Application.Quit();
+	    if (Input.GetKey (KeyCode.Escape)) {
+		Application.Quit ();
 	    }
 		
 	    if (m_IsInstantMsg)
@@ -257,13 +268,24 @@ namespace GoogleARCore.ARFuniture
 	    TrackableHit hit;
 	    TrackableHitFlags raycastFilter = TrackableHitFlags.PlaneWithinPolygon | TrackableHitFlags.FeaturePointWithSurfaceNormal;
 
+	    Touch touch = Input.GetTouch (0);
+
+	    //if (Frame.Raycast (touch.position.x, touch.position.y, raycastFilter, out hit)) 
 	    if (Frame.Raycast (Screen.width / 2, Screen.height / 2, raycastFilter, out hit)) {
 		m_CurrentPosition = hit.Pose.position;
-		m_CurrentRotation = hit.Pose.rotation;
+		//m_CurrentRotation = hit.Pose.rotation;
+		//if (firstCreate) {
+		//    m_ControlObject.transform.localPosition = hit.Pose.position;
+		//}
 	    }
 
+	    //if (touch.phase == TouchPhase.Ended) {
+	    //firstCreate = false;
+	    //}
+
+
 	    // If the player has not touched the screen, we are done with this update.
-	    Touch touch = Input.GetTouch (0);
+
 	    if (m_ButtonUIRect.Contains (touch.position))
 		return;
 
@@ -311,7 +333,8 @@ namespace GoogleARCore.ARFuniture
 	    if (Frame.Raycast (touch.position.x, touch.position.y, raycastFilter, out hit)) {
 		if (m_IsSelectRotObj == false) {
 		    m_ControlObject.transform.localPosition = hit.Pose.position;
-		    m_RotationObject.transform.localPosition = new Vector3 (hit.Pose.position.x, hit.Pose.position.y, hit.Pose.position.z);
+		    m_RotationObject.transform.localPosition = hit.Pose.position;
+		    m_RotationObject.transform.localRotation = hit.Pose.rotation;
 		}
 	    }
 	}
