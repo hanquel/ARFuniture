@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44300613, g: 0.49219513, b: 0.57192427, a: 1}
+  m_IndirectSpecularColor: {r: 0.44300637, g: 0.4921953, b: 0.5719249, a: 1}
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
@@ -732,7 +732,7 @@ MonoBehaviour:
   FirstPersonCamera: {fileID: 896679035}
   TrackedPlanePrefab: {fileID: 1654175882956584, guid: 6a35c744e5010405c847fad90282d2be,
     type: 2}
-  TableObject: {fileID: 125084, guid: d3f657ee579507448b9e3362a48cce8a, type: 2}
+  TableObject: {fileID: 169324, guid: 420d45dbf1b7f8440bf16aa427698320, type: 2}
   ChairObject: {fileID: 165194, guid: c55028b02c952de4db619ccf3442f4ac, type: 2}
   RotationObject: {fileID: 1044822164575338, guid: fb149bf2f46c652499df455d18d76d35,
     type: 2}

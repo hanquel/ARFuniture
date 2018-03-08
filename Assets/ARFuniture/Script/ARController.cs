@@ -318,7 +318,7 @@ namespace GoogleARCore.ARFuniture
 
 	    if (m_IsSelectRotObj) {
 		if (touch.phase == TouchPhase.Moved) {
-		    float d = Vector2.Distance (m_BeginRotPosition, touch.position) / 50.0f;
+		    float d = Vector2.Distance (m_BeginRotPosition, touch.position) / 100.0f;
 		    if (m_BeginRotPosition.x - touch.position.x < 0)
 			d *= -1;
 		    m_ControlObject.transform.localEulerAngles += new Vector3 (0.0f, d, 0.0f);
